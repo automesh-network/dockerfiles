@@ -1,4 +1,4 @@
-FROM rust
+FROM ghcr.io/automesh-network/dockerfiles:rust-windows
 
 RUN choco install openssl git strawberryperl just -y
 
