@@ -1,5 +1,8 @@
 FROM ghcr.io/automesh-network/dockerfiles:win-dev-rust
 
+ARG VCPKG_BINARY_SOURCES=
+ARG ACTIONS_CACHE_URL=
+ARG ACTIONS_RUNTIME_TOKEN=
 RUN vcpkg install openssl:x64-windows openssl:x64-windows-static openssl:x64-windows-static-md
 RUN vcpkg install openssl:x86-windows openssl:x86-windows-static openssl:x86-windows-static-md
 RUN vcpkg install openssl:arm64-windows openssl:arm64-windows-static openssl:arm64-windows-static-md
