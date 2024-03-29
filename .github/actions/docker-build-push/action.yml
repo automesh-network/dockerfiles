@@ -1,0 +1,52 @@
+name: 'Docker image build and push'
+description: 'Docker image build and push'
+inputs:
+  push:
+    description: 'Docker push after build'
+    default: true
+  registry:
+    description: 'Docker image registry'
+    default: 'ghcr.io'
+  image:
+    description: 'Docker image name'
+    # github.repository as <account>/<repo>
+    default: '${{ github.repository }}'
+  tag:
+    description: 'Docker image tag'
+    required: true
+  context:
+    description: 'Docker build context'
+    default: '.'
+  file:
+    description: 'Dockerfile in context'
+    default: 'Dockerfile'
+  shell:
+    description: 'Shell to execute command'
+    default: 'bash'
+runs:
+  using: "composite"
+  steps:
+      # Export required GitHub Actions envrionment variables,
+      # vcpkg will now upload or restore packages from the actions cache.
+      - name: Export GitHub Actions cache environment variables
+        uses: actions/github-script@v6
+        with:
+          script: |
+            core.exportVariable('ACTIONS_CACHE_URL', process.env.ACTIONS_CACHE_URL || '');
+            core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
+
+      # Build docker image with vcpkg cache options: (x-gha: github-cache-token).
+      - name: Build docker image ${{ inputs.registry }}/${{ inputs.image }}:${{ inputs.tag }}
+        run: |
+          docker build \
+            --build-arg VCPKG_BINARY_SOURCES="clear;x-gha,readwrite" \
+            --build-arg ACTIONS_CACHE_URL="${{ env.ACTIONS_CACHE_URL }}" \
+            --build-arg ACTIONS_CACHE_URL="${{ env.ACTIONS_RUNTIME_TOKEN }}" \
+            -t "${{ inputs.registry }}/${{ inputs.image }}:${{ inputs.tag }}" ${{ inputs.context }}
+        shell: ${{ inputs.shell }}
+
+      # Push docker image to registry if the current github event is not pull request.
+      - name: Push docker image ${{ inputs.registry }}/${{ inputs.image }}:${{ inputs.tag }}
+        if: ${{ inputs.push == true || inputs.push == 'true' }}
+        run: docker push "${{ inputs.registry }}/${{ inputs.image }}:${{ inputs.tag }}"
+        shell: ${{ inputs.shell }}
