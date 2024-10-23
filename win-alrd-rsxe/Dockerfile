@@ -6,8 +6,8 @@ RUN vcpkg install openssl:arm64-windows openssl:arm64-windows-static openssl:arm
 
 RUN choco install git strawberryperl just -y
 
-ARG RUST_STABLE_VERSION=1.76
-ARG RUST_NIGHTLY_VERSION=2024-02-08
+ARG RUST_STABLE_VERSION=1.82
+ARG RUST_NIGHTLY_VERSION=2024-10-22
 RUN rustup install $env:RUST_STABLE_VERSION
 RUN rustup default $env:RUST_STABLE_VERSION
 RUN rustup install nightly-$env:RUST_NIGHTLY_VERSION
